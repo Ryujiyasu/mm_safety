@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/ubuntu/humble_ws/install/teleop_twist_joy/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/ubuntu/humble_ws/src/mobilemover/mobilemover_eps/include/**",
+        "/home/ubuntu/humble_ws/src/mobilemover/mobilemover_epsfront/include/**",
+        "/home/ubuntu/humble_ws/src/mobilemover/mobilemover_handai/include/**",
+        "/home/ubuntu/humble_ws/src/mobilemover/mobilemover_node/include/**",
+        "/home/ubuntu/humble_ws/src/teleop_twist_joy/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
