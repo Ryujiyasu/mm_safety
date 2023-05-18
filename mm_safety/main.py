@@ -2,7 +2,7 @@ import rclpy
 from rclpy.node import Node
 import serial
 
-from std_msgs.msg import String
+from std_msgs.msg import Int8
 from geometry_msgs.msg import Twist
 
 NORMAL = 0
@@ -17,17 +17,24 @@ class MinimalPublisher(Node):
 
         timer_period = 0.01  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.flash_timer = self.create_timer(1, self.flash_timer_callback)
         self.status = NORMAL
         self.status_count = 0
         self.stop_num = None
         self.stop_distance = None
         self.publisher_ = self.create_publisher(Twist, 'post_cmd_vel', 10)
+        self.mm_status_publisher = self.create_publisher(Int8, 'mm_flash', 10)
         self.subscription = self.create_subscription(
             Twist,
             'cmd_vel',
             self.listener_callback,
             10)
         self.subscription
+
+    def flash_timer_callback(self):
+        msg = Int8()
+        msg.data = self.status
+        self.mm_status_publisher.publish(msg)
 
     def listener_callback(self, msg):
         if self.status == NORMAL:
