@@ -17,6 +17,7 @@ class MinimalPublisher(Node):
 
         timer_period = 0.01  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.flash_timer = self.create_timer(1, self.flash_timer_callback)
         self.status = NORMAL
         self.status_count = 0
         self.stop_num = None
@@ -43,8 +44,7 @@ class MinimalPublisher(Node):
             msg.angular.z = 0.0
             self.publisher_.publish(msg)
 
-    def timer_callback(self):
-        data = self.ser.readline()
+    def flash_timer_callback(self):
         flash_msg = Int8()
         print(self.status)
         if self.status == NORMAL:
@@ -54,6 +54,9 @@ class MinimalPublisher(Node):
         elif self.status == STOP:
             flash_msg.data = 1
         self.flash_publisher_.publish(flash_msg)
+
+    def timer_callback(self):
+        data = self.ser.readline()
         try:
             data = str(data.decode('utf-8')).split(',')
             number = data[0]
@@ -109,7 +112,7 @@ class MinimalPublisher(Node):
             msg = Twist()
             msg.linear.x = 0.0
             msg.angular.z = 0.0
-            self.publisher_.publish(msg)            
+            self.publisher_.publish(msg)        
 
 def main(args=None):
     rclpy.init(args=args)
