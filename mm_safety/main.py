@@ -21,10 +21,10 @@ class MinimalPublisher(Node):
         self.status_count = 0
         self.stop_num = None
         self.stop_distance = None
-        self.publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.publisher_ = self.create_publisher(Twist, 'post_cmd_vel', 10)
         self.subscription = self.create_subscription(
             Twist,
-            'pre_cmd_vel',
+            'cmd_vel',
             self.listener_callback,
             10)
         self.subscription
