@@ -9,21 +9,31 @@ NORMAL = 0
 SLOW = 1
 STOP = 2
 
-class MinimalPublisher(Node):
+PWM = 0
+AUTO = 1
+MANUAL = 2
 
+
+class MinimalPublisher(Node):
     def __init__(self):
         super().__init__('minimal_publisher')
         self.ser = serial.Serial('/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_85036313430351901210-if00', 9600, timeout=None)
 
         timer_period = 0.01  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        # self.flash_timer = self.create_timer(1, self.flash_timer_callback)
+        self.flash_timer = self.create_timer(1, self.flash_timer_callback)
         self.status = NORMAL
         self.status_count = 0
+        self.mm_status = PWM
         self.stop_num = None
         self.stop_distance = None
         self.publisher_ = self.create_publisher(Twist, 'post_cmd_vel', 10)
-        # self.mm_status_publisher = self.create_publisher(Int8, 'mm_flash', 10)
+        self.mm_status_publisher = self.create_publisher(Int8, 'mm_flash', 10)
+        self.mm_status_subscription = self.create_subscription(
+            Int8,
+            'mm_status',
+            self.status_listener_callback,
+            10)
         self.subscription = self.create_subscription(
             Twist,
             'cmd_vel',
@@ -39,18 +49,44 @@ class MinimalPublisher(Node):
         msg.data = self.status
         self.mm_status_publisher.publish(msg)
 
-    def listener_callback(self, msg):
-        if self.status == NORMAL:
-            self.publisher_.publish(msg)
-        elif self.status == SLOW:
-            msg.linear.x = msg.linear.x / 2
-            msg.angular.z = msg.angular.z / 2
-            self.publisher_.publish(msg)
-        elif self.status == STOP:
-            msg.linear.x = 0.0
-            msg.angular.z = 0.0
-            self.publisher_.publish(msg)
+    def status_listener_callback(self, msg):
+        self.mm_status = msg.data
 
+    def listener_callback(self, msg):
+        if self.mm_status == MANUAL:
+            if self.status == NORMAL:
+                self.publisher_.publish(msg)
+            elif self.status == SLOW:
+                msg.linear.x = msg.linear.x / 2
+                msg.angular.z = msg.angular.z
+                self.publisher_.publish(msg)
+            elif self.status == STOP:
+                msg.linear.x = 0.0
+                msg.angular.z = 0.0
+                self.publisher_.publish(msg)
+        elif self.mm_status == AUTO:
+            if self.status == NORMAL:
+                self.publisher_.publish(msg)
+            elif self.status == SLOW:
+                msg.linear.x = msg.linear.x
+                msg.angular.z = msg.angular.z
+                self.publisher_.publish(msg)
+            elif self.status == STOP:
+                msg.linear.x = 0.0
+                msg.angular.z = 0.0
+                self.publisher_.publish(msg)
+        else:
+            if self.status == NORMAL:
+                self.publisher_.publish(msg)
+            elif self.status == SLOW:
+                msg.linear.x = msg.linear.x
+                msg.angular.z = msg.angular.z
+                self.publisher_.publish(msg)
+            elif self.status == STOP:
+                msg.linear.x = 0.0
+                msg.angular.z = 0.0
+                self.publisher_.publish(msg)
+            
 
     def timer_callback(self):
         data = self.ser.readline()
