@@ -13,7 +13,7 @@ class MinimalPublisher(Node):
 
     def __init__(self):
         super().__init__('minimal_publisher')
-        self.ser = serial.Serial('/dev/ttyACM0', 9600, timeout=None)
+        self.ser = serial.Serial('/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_85036313430351901210-if00', 9600, timeout=None)
 
         timer_period = 0.01  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
