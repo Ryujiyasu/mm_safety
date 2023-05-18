@@ -2,7 +2,7 @@ import rclpy
 from rclpy.node import Node
 import serial
 
-from std_msgs.msg import String
+from std_msgs.msg import Int8
 from geometry_msgs.msg import Twist
 
 NORMAL = 0
@@ -22,6 +22,7 @@ class MinimalPublisher(Node):
         self.stop_num = None
         self.stop_distance = None
         self.publisher_ = self.create_publisher(Twist, 'post_cmd_vel', 10)
+        self.flash_publisher_ = self.create_publisher(Int8, 'mm_flash', 10)
         self.subscription = self.create_subscription(
             Twist,
             'cmd_vel',
@@ -41,9 +42,16 @@ class MinimalPublisher(Node):
             msg.angular.z = 0.0
             self.publisher_.publish(msg)
 
-
     def timer_callback(self):
         data = self.ser.readline()
+        flash_msg = Int8()
+        if self.status == NORMAL:
+            flash_msg.data = 0
+        elif self.status == SLOW:
+            flash_msg.data = 1
+        elif self.status == STOP:
+            flash_msg.data = 1
+        self.mm_flash.publish(flash_msg)
         try:
             data = str(data.decode('utf-8')).split(',')
             number = data[0]
