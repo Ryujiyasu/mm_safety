@@ -29,6 +29,7 @@ class MinimalPublisher(Node):
             self.listener_callback,
             10)
         self.subscription
+        
 
     def listener_callback(self, msg):
         if self.status == NORMAL:
@@ -45,13 +46,14 @@ class MinimalPublisher(Node):
     def timer_callback(self):
         data = self.ser.readline()
         flash_msg = Int8()
+        print(self.status)
         if self.status == NORMAL:
             flash_msg.data = 0
         elif self.status == SLOW:
             flash_msg.data = 1
         elif self.status == STOP:
             flash_msg.data = 1
-        self.mm_flash.publish(flash_msg)
+        self.flash_publisher_.publish(flash_msg)
         try:
             data = str(data.decode('utf-8')).split(',')
             number = data[0]
