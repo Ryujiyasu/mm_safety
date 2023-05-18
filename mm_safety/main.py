@@ -56,6 +56,7 @@ class MinimalPublisher(Node):
         self.flash_publisher_.publish(flash_msg)
 
     def timer_callback(self):
+        print('timer_callback')
         data = self.ser.readline()
         try:
             data = str(data.decode('utf-8')).split(',')
