@@ -34,6 +34,11 @@ class MinimalPublisher(Node):
             'mm_status',
             self.status_listener_callback,
             10)
+        self.mm_reset_subscription = self.create_subscription(
+            Int8,
+            'mm_reset',
+            self.reset_listener_callback,
+            10)
         self.subscription = self.create_subscription(
             Twist,
             'cmd_vel',
@@ -43,6 +48,9 @@ class MinimalPublisher(Node):
 
     def __del__(self):
         self.ser.close()
+
+    def reset_listener_callback(self):
+        self.status = NORMAL
 
     def flash_timer_callback(self):
         msg = Int8()
