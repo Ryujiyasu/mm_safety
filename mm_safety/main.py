@@ -19,7 +19,7 @@ class MinimalPublisher(Node):
         super().__init__('minimal_publisher')
         self.ser = serial.Serial('/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_85036313430351901210-if00', 9600, timeout=None)
 
-        timer_period = 0.01  # seconds
+        timer_period = 0.005  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.flash_timer = self.create_timer(1, self.flash_timer_callback)
         self.status = NORMAL
@@ -50,6 +50,7 @@ class MinimalPublisher(Node):
         self.ser.close()
 
     def reset_listener_callback(self):
+        print("reset")
         self.status = NORMAL
 
     def flash_timer_callback(self):
@@ -66,7 +67,7 @@ class MinimalPublisher(Node):
                 self.publisher_.publish(msg)
             elif self.status == SLOW:
                 msg.linear.x = msg.linear.x / 2
-                msg.angular.z = msg.angular.z
+                msg.angular.z = msg.angular.z/2
                 self.publisher_.publish(msg)
             elif self.status == STOP:
                 msg.linear.x = 0.0
@@ -111,7 +112,7 @@ class MinimalPublisher(Node):
                     self.status = STOP
                     self.stop_num = number
                     self.stop_distance = distance
-                elif (number == '3' or number == '7') and float(distance) <= 25:
+                elif (number == '3' or number == '7') and float(distance) <= 50:
                     self.status = STOP
                     self.stop_num = number
                     self.stop_distance = distance
@@ -125,26 +126,57 @@ class MinimalPublisher(Node):
                         self.status_count = 0
                         self.stop_num = number
                         self.stop_distance = distance
+                        msg = Twist()
+                        msg.angular.z = 0.0
+                        msg.linear.x = 0.0
+                        self.publisher_.publish(msg)
                     elif (number == '2' or number == '6') and float(distance) <= 40:
                         self.status = SLOW
                         self.status_count = 0
                         self.stop_num = number
                         self.stop_distance = distance
-                    elif (number == '3' or number == '7') and float(distance) <= 50:
+                        msg = Twist()
+                        msg.angular.z = 0.0
+                        msg.linear.x = 0.0
+                        self.publisher_.publish(msg)
+                    elif (number == '3' or number == '7') and float(distance) <= 100:
                         self.status = SLOW
                         self.status_count = 0
                         self.stop_num = number
                         self.stop_distance = distance
+                        msg = Twist()
+                        msg.angular.z = 0.0
+                        msg.linear.x = 0.0
+                        self.publisher_.publish(msg)
                     elif (number == '4' or number == '8') and float(distance) <= 40:
                         self.status = SLOW
                         self.status_count = 0
                         self.stop_num = number
                         self.stop_distance = distance
+                        msg = Twist()
+                        msg.angular.z = 0.0
+                        msg.linear.x = 0.0
+                        self.publisher_.publish(msg)
                     else:
                         self.status_count += 1
 
-                    if self.status_count >= 50:
+                    if self.status_count >= 30:
                         self.status = NORMAL
+                else:
+                    if (number == '1' or number == '5') and float(distance) <= 100:
+                        pass
+                    elif (number == '2' or number == '6') and float(distance) <= 40:
+                        pass
+                    elif (number == '3' or number == '7') and float(distance) <= 50:
+                        pass
+                    elif (number == '4' or number == '8') and float(distance) <= 40:
+                        pass
+                    else:
+                        self.status_count += 1
+                        
+                    if self.status_count >= 100:
+                        self.status = NORMAL
+
             print(self.status, self.status_count, self.stop_num, self.stop_distance)
 
         except Exception as e:
@@ -153,7 +185,7 @@ class MinimalPublisher(Node):
             msg = Twist()
             msg.linear.x = 0.0
             msg.angular.z = 0.0
-            self.publisher_.publish(msg)            
+            self.publisher_.publish(msg)
 
 def main(args=None):
     rclpy.init(args=args)
